@@ -1,4 +1,3 @@
-
 import config.ServerConfig;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.aeonbits.owner.ConfigFactory;
@@ -28,15 +27,12 @@ public class YandexMarketTest {
 
     By electronicLocator = By.cssSelector("[href*='/catalog--elektronika/'] > span");
     By mobileLocator = By.cssSelector("[href*='/catalog--smartfony/']");
-
     By modelNameLocator = By.cssSelector("[data-zone-name='title'] a");
     By compareWidgetLocator = By.cssSelector("[data-apiary-widget-id='/content/popupInformer'] > div");
     By unitNameInWidgetLocator = By.cssSelector("div > div:nth-child(2) > div:first-child");
     By resultListLocator = By.cssSelector("[data-zone-name='snippetList'] > article");
-   // By productListLocator = By.cssSelector("article[data-autotest-id='product-snippet']");
     By ascOrderFilterLocator = By.cssSelector("button[data-autotest-id='dprice']");
     By makerLocator = By.cssSelector("fieldset[data-autotest-id='7893318']");
-
     By compareUnitListLocator = By.cssSelector("div[data-apiary-widget-id='/content/compareContent'] img");
     By overlaySearchResultLocator = By.cssSelector("div[data-tid='67d9be0a']");
     By buttonCompareInWidget = By.linkText("Сравнить");
@@ -48,67 +44,102 @@ public class YandexMarketTest {
        String model1 = "Samsung";
        String model2 = "Xiaomi";
 
-        //открыть яндекс маркет
-        driver.get(conf.mainUrl());
-        logger.info("Открыта страница {}", conf.mainUrl());
-        //Перейти Элекроника - Смартфоны
-        driver.findElement(electronicLocator).click();
-        logger.info("Перешли  в раздел Электроника");
-        WebElement mobile =  waitVisibilityElement(mobileLocator, 10);
-        mobile.click();
+        //1. открыть яндекс маркет
+        openMainPage();
+
+        //2. Перейти Элекроника - Смартфоны
+        goToElectronicPage();
+        goToSmartphonesPage();
         logger.info("Перешли в раздел Смартфоны");
 
-        //Отсортировать список товаров Samsung и Xiaomi
+        //3. Отсортировать список товаров Samsung и Xiaomi
         filterByMaker(model1);
         filterByMaker(model2);
         logger.info("Отсортировано по моделям");
 
-        //Отсортирован список товаров по цене
+        //4. Отсортирован список товаров по цене
         sortByPriceAscending();
 
-        //Добавить первый в списке Samsung
-        List<WebElement> resultsList = driver.findElements(resultListLocator);
+        //5. Добавить первый в списке Samsung
+        List<WebElement> resultsList = getAllResults();
         logger.debug("Получен список результатов. Размер массива = {}", resultsList.size());
 
-        addFirstToCompare(resultsList, model1);
-        //Добавить первый в списке Xiaomi
-        addFirstToCompare(resultsList, model2);
+        String modelName1 = addFirstToCompare(resultsList, model1);
+        String phoneNameInPopup1 = getTextPhoneNameInCompareWidget();  //получить полное название модели из виджета сравнения
+        logger.info("Текст в плашке сравнения: {}", phoneNameInPopup1);
+        //Проверить, что отобразилась плашка "Товар {имя товара} добавлен к сравнению"
+        assertTrue(phoneNameInPopup1.equals("Товар " + modelName1 + " добавлен к сравнению"));
+
+        //6. Добавить первый в списке Xiaomi
+        String modelName2 = addFirstToCompare(resultsList, model2);
+        String phoneNameInPopup2 = getTextPhoneNameInCompareWidget();  //получить полное название модели из виджета сравнения
+        logger.info("Текст в плашке сравнения: {}", phoneNameInPopup2);
+        //Проверить, что отобразилась плашка "Товар {имя товара} добавлен к сравнению"
+        assertTrue(phoneNameInPopup2.equals("Товар " + modelName2 + " добавлен к сравнению"));
 
         //перейти к сравнению
+        goToComparePage();
+
+        //Проверить, что в списке товаров две позиции
+        assertQuantityItemsInComparePage(2);
+    }
+
+    private String addFirstToCompare(List<WebElement> resultsList, String model) {
+        for (int i = 0; i < resultsList.size(); i++) {
+            By currentCompareLocator = By.cssSelector("div[data-zone-name='snippetList'] article:nth-child(" + (i + 1) + ") div[aria-label*='сравнению']"); //получение локатора для конкретного товара в списке
+            WebElement phoneItem = resultsList.get(i);
+            String modelName = phoneItem.findElement(modelNameLocator).getAttribute("title");      //получение имени модели в списке
+            logger.debug("{} Получено имя модели в списке: {}", i, modelName);
+            if (modelName.contains(model)) {
+                Actions action2 = new Actions(driver);
+                action2.moveToElement(phoneItem).build().perform();                                     //наведение мышки на элемент списка с найденным телефоном, чтобы появилась кнопка "Добавить к сравнению"
+                WebElement currentCompareButton = phoneItem.findElement(currentCompareLocator);         // получение элемента "Добавить к сравнению" у нужной модели
+                waitElementToBeClickable(currentCompareButton, 10).click();                    //ожидание и клик по кнопке "Добавить к сравнению"
+                return modelName;
+            }
+        }
+        return null;
+    }
+
+    public void openMainPage() {
+        driver.get(conf.mainUrl());
+        logger.info("Открыта страница {}", conf.mainUrl());
+    }
+
+    public void goToSmartphonesPage() {
+        WebElement mobile =  waitVisibilityElement(mobileLocator, 10);
+        mobile.click();
+        logger.info("Перешли в раздел Смартфоны");
+    }
+
+    public void goToElectronicPage() {
+        driver.findElement(electronicLocator).click();
+        logger.info("Перешли  в раздел Электроника");
+    }
+
+    //получить список поискового результата после фильтрации
+    public List<WebElement> getAllResults() {
+        return driver.findElements(resultListLocator);
+    }
+
+    //проверить, что на вкладке Сравнения находится заданное число объектов (товаров)
+    public void assertQuantityItemsInComparePage(int count) {
+        List<WebElement> compareUnitsList = driver.findElements(compareUnitListLocator);
+        assertEquals(count, compareUnitsList.size());
+    }
+
+    public void goToComparePage() {
         WebElement compareWidget = driver.findElement(compareWidgetLocator);
         WebElement compareButton = compareWidget.findElement(buttonCompareInWidget);
         compareButton.click();
         waitTitleIs(compareTitle, 10);
         logger.info("Перешли в раздел 'Сравнить'");
-
-        //Проверить, что в списке товаров две позиции
-        List<WebElement> compareUnitsList = driver.findElements(compareUnitListLocator);
-        assertEquals(2, compareUnitsList.size());
-
-
     }
 
-    private void addFirstToCompare(List<WebElement> resultsList, String model) {
-        for (int i = 0; i < resultsList.size(); i++) {
-            By currentCompareLocator = By.cssSelector("div[data-zone-name='snippetList'] article:nth-child(" + (i + 1) + ") div[aria-label*='сравнению']");
-            WebElement phoneItem = resultsList.get(i);
-            String modelName = phoneItem.findElement(modelNameLocator).getAttribute("title");
-            logger.debug("{} Получено имя модели в списке: {}", i, modelName);
-            if (modelName.contains(model)) {
-                Actions action2 = new Actions(driver);
-                action2.moveToElement(phoneItem).build().perform();      //наведение мышки на элемент списка с найденным телефоном, чтобы появилась кнопка "Добавить к сравнению"
-                WebElement currentCompareButton = phoneItem.findElement(currentCompareLocator);
-                waitElementToBeClickable(currentCompareButton, 10).click();
-
-                //работа с виджетом
-                WebElement compareWidget =  waitVisibilityElement(compareWidgetLocator, 10);//wait.until(ExpectedConditions.visibilityOfElementLocated(compareWidgetLocator));
-                String phoneNameInPopup = compareWidget.findElement(unitNameInWidgetLocator).getAttribute("innerText");
-                logger.info("Текст в плашке сравнения: {}", phoneNameInPopup);
-                assertTrue(phoneNameInPopup.contains(model));
-                assertTrue(phoneNameInPopup.equals("Товар " + modelName + " добавлен к сравнению"));
-                break;
-            }
-        }
+    //получить полное наименование телефона в виджете
+    public String getTextPhoneNameInCompareWidget() {
+        WebElement compareWidget =  waitVisibilityElement(compareWidgetLocator, 10);            //ожидание появление виджета
+        return compareWidget.findElement(unitNameInWidgetLocator).getAttribute("innerText");
     }
 
     public WebElement waitVisibilityElement(By locator, int timeInSec) {
@@ -131,6 +162,7 @@ public class YandexMarketTest {
         wait.until(ExpectedConditions.invisibilityOf(driver.findElement(locator)));
     }
 
+    //поиск по определенной модели телефона
     public void filterByMaker(String makerName) {
         WebElement makerList = waitVisibilityElement(makerLocator, 10);
         makerList.findElement(By.xpath(".//span[contains(text(), '" + makerName + "')]")).click();
@@ -143,9 +175,6 @@ public class YandexMarketTest {
         waitInvisibilityOf(overlaySearchResultLocator, 5);
         logger.info("Список отсортирован по цене");
     }
-
-
-
 
     @Before
     public void setUp() {
