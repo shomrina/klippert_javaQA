@@ -77,10 +77,10 @@ public class YandexMarketTest {
         //Проверить, что отобразилась плашка "Товар {имя товара} добавлен к сравнению"
         assertTrue(phoneNameInPopup2.equals("Товар " + modelName2 + " добавлен к сравнению"));
 
-        //перейти к сравнению
+        //7. перейти к сравнению
         goToComparePage();
 
-        //Проверить, что в списке товаров две позиции
+        //8. Проверить, что в списке товаров две позиции
         assertQuantityItemsInComparePage(2);
     }
 
@@ -129,8 +129,8 @@ public class YandexMarketTest {
     }
 
     public void goToComparePage() {
-        WebElement compareWidget = driver.findElement(compareWidgetLocator);
-        WebElement compareButton = compareWidget.findElement(buttonCompareInWidget);
+        WebElement compareWidget =  waitVisibilityElement(compareWidgetLocator, 10);
+        WebElement compareButton = waitElementToBeClickable(compareWidget.findElement(buttonCompareInWidget), 5);
         compareButton.click();
         waitTitleIs(compareTitle, 10);
         logger.info("Перешли в раздел 'Сравнить'");
