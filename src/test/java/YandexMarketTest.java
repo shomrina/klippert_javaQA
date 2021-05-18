@@ -1,4 +1,4 @@
-import com.sun.security.sasl.ntlm.FactoryImpl;
+
 import config.ServerConfig;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.aeonbits.owner.ConfigFactory;
@@ -29,18 +29,19 @@ public class YandexMarketTest {
     By electronicLocator = By.cssSelector("[href*='/catalog--elektronika/'] > span");
     By mobileLocator = By.cssSelector("[href*='/catalog--smartfony/']");
 
-    By firstAddToCompareLocator = By.cssSelector("div[data-zone-name='snippetList'] > article:nth-child(1) div:nth-of-type(5)"); //By.cssSelector("div[aria-label='Добавить к сравнению']");
-    //article._1_IxNTwqll:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1)
-    //By.cssSelector("div[data-zone-name='snippetList'] > article:nth-child(1) div[aria-label*='сравнению']");  By.cssSelector("div[data-zone-name='snippetList'] > article:nth-child(1) div[data-tid='сравнению'] > div");
     By modelNameLocator = By.cssSelector("[data-zone-name='title'] a");
     By compareWidgetLocator = By.cssSelector("[data-apiary-widget-id='/content/popupInformer'] > div");
     By unitNameInWidgetLocator = By.cssSelector("div > div:nth-child(2) > div:first-child");
     By resultListLocator = By.cssSelector("[data-zone-name='snippetList'] > article");
-    By productListLocator = By.cssSelector("article[data-autotest-id='product-snippet']");
+   // By productListLocator = By.cssSelector("article[data-autotest-id='product-snippet']");
     By ascOrderFilterLocator = By.cssSelector("button[data-autotest-id='dprice']");
     By makerLocator = By.cssSelector("fieldset[data-autotest-id='7893318']");
 
     By compareUnitListLocator = By.cssSelector("div[data-apiary-widget-id='/content/compareContent'] img");
+    By overlaySearchResultLocator = By.cssSelector("div[data-tid='67d9be0a']");
+    By buttonCompareInWidget = By.linkText("Сравнить");
+
+    String compareTitle = "Сравнение товаров — Яндекс.Маркет";
 
     @Test
     public void addToCompare() throws InterruptedException {
@@ -53,66 +54,54 @@ public class YandexMarketTest {
         //Перейти Элекроника - Смартфоны
         driver.findElement(electronicLocator).click();
         logger.info("Перешли  в раздел Электроника");
-        WebDriverWait wait = new WebDriverWait(driver, 10);
-        WebElement mobile =  wait.until(ExpectedConditions.visibilityOfElementLocated(mobileLocator));
+        WebElement mobile =  waitVisibilityElement(mobileLocator, 10);
         mobile.click();
         logger.info("Перешли в раздел Смартфоны");
 
         //Отсортировать список товаров Samsung и Xiaomi
-        WebElement makerList = wait.until(ExpectedConditions.visibilityOfElementLocated(makerLocator));  //makerLocator
-        makerList.findElement(By.xpath(".//span[contains(text(), 'Samsung')]")).click();
-        makerList.findElement(By.xpath(".//span[contains(text(), 'Xiaomi')]")).click();
+        filterByMaker(model1);
+        filterByMaker(model2);
         logger.info("Отсортировано по моделям");
 
         //Отсортирован список товаров по цене
-        driver.findElement(ascOrderFilterLocator).click();
-        wait.until(ExpectedConditions.elementToBeClickable(productListLocator));  //productListLocator
-
-
-        Actions action = new Actions(driver);
-        action.moveToElement(driver.findElements(productListLocator).get(0)).build().perform();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(firstAddToCompareLocator));
+        sortByPriceAscending();
 
         //Добавить первый в списке Samsung
         List<WebElement> resultsList = driver.findElements(resultListLocator);
-        logger.info("Получен список результатов. Размер массива = {}", resultsList.size());
-        addFirstToCompare(resultsList, wait, model1);
+        logger.debug("Получен список результатов. Размер массива = {}", resultsList.size());
+
+        addFirstToCompare(resultsList, model1);
         //Добавить первый в списке Xiaomi
-        addFirstToCompare(resultsList, wait, model2);
+        addFirstToCompare(resultsList, model2);
 
         //перейти к сравнению
         WebElement compareWidget = driver.findElement(compareWidgetLocator);
-         WebElement compareButton = compareWidget.findElement(By.linkText("Сравнить"));
-         compareButton.click();
-        wait.until(ExpectedConditions.titleIs("Сравнение товаров — Яндекс.Маркет"));
+        WebElement compareButton = compareWidget.findElement(buttonCompareInWidget);
+        compareButton.click();
+        waitTitleIs(compareTitle, 10);
         logger.info("Перешли в раздел 'Сравнить'");
 
         //Проверить, что в списке товаров две позиции
         List<WebElement> compareUnitsList = driver.findElements(compareUnitListLocator);
         assertEquals(2, compareUnitsList.size());
-        logger.info("Проверка, что в списке товаров две позиции успешно завершена");
-
-
 
 
     }
 
-    private void addFirstToCompare(List<WebElement> resultsList, WebDriverWait wait, String model) {
+    private void addFirstToCompare(List<WebElement> resultsList, String model) {
         for (int i = 0; i < resultsList.size(); i++) {
+            By currentCompareLocator = By.cssSelector("div[data-zone-name='snippetList'] article:nth-child(" + (i + 1) + ") div[aria-label*='сравнению']");
             WebElement phoneItem = resultsList.get(i);
             String modelName = phoneItem.findElement(modelNameLocator).getAttribute("title");
-            logger.info("{} Получено имя модели в списке: {}", i, modelName);
+            logger.debug("{} Получено имя модели в списке: {}", i, modelName);
             if (modelName.contains(model)) {
                 Actions action2 = new Actions(driver);
                 action2.moveToElement(phoneItem).build().perform();      //наведение мышки на элемент списка с найденным телефоном, чтобы появилась кнопка "Добавить к сравнению"
-
-                By currentCompareLocator = By.cssSelector("div[data-zone-name='snippetList'] article:nth-child(" + (i + 1) + ") div[aria-label*='сравнению']");
-
-                wait.until(ExpectedConditions.elementToBeClickable(phoneItem.findElement(currentCompareLocator))).click();
+                WebElement currentCompareButton = phoneItem.findElement(currentCompareLocator);
+                waitElementToBeClickable(currentCompareButton, 10).click();
 
                 //работа с виджетом
-                wait.until(ExpectedConditions.visibilityOfElementLocated(compareWidgetLocator));
-                WebElement compareWidget =  wait.until(ExpectedConditions.visibilityOfElementLocated(compareWidgetLocator));
+                WebElement compareWidget =  waitVisibilityElement(compareWidgetLocator, 10);//wait.until(ExpectedConditions.visibilityOfElementLocated(compareWidgetLocator));
                 String phoneNameInPopup = compareWidget.findElement(unitNameInWidgetLocator).getAttribute("innerText");
                 logger.info("Текст в плашке сравнения: {}", phoneNameInPopup);
                 assertTrue(phoneNameInPopup.contains(model));
@@ -121,6 +110,40 @@ public class YandexMarketTest {
             }
         }
     }
+
+    public WebElement waitVisibilityElement(By locator, int timeInSec) {
+        WebDriverWait wait = new WebDriverWait(driver, timeInSec);
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+    }
+
+    public WebElement waitElementToBeClickable(WebElement webElement, int timeInSec) {
+        WebDriverWait wait = new WebDriverWait(driver, timeInSec);
+        return wait.until(ExpectedConditions.elementToBeClickable(webElement));
+    }
+
+    public void waitTitleIs(String title, int timeOutInSeconds) {
+        WebDriverWait wait = new WebDriverWait(driver, timeOutInSeconds);
+        wait.until(ExpectedConditions.titleIs(title));
+    }
+
+    public void waitInvisibilityOf(By locator, int timeInSec) {
+        WebDriverWait wait = new WebDriverWait(driver, timeInSec);
+        wait.until(ExpectedConditions.invisibilityOf(driver.findElement(locator)));
+    }
+
+    public void filterByMaker(String makerName) {
+        WebElement makerList = waitVisibilityElement(makerLocator, 10);
+        makerList.findElement(By.xpath(".//span[contains(text(), '" + makerName + "')]")).click();
+        waitInvisibilityOf(overlaySearchResultLocator, 5);
+    }
+
+    //сортировка по возрастанию
+    public void sortByPriceAscending() {
+        driver.findElement(ascOrderFilterLocator).click();
+        waitInvisibilityOf(overlaySearchResultLocator, 5);
+        logger.info("Список отсортирован по цене");
+    }
+
 
 
 
