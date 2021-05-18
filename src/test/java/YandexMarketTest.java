@@ -40,7 +40,7 @@ public class YandexMarketTest {
     String compareTitle = "Сравнение товаров — Яндекс.Маркет";
 
     @Test
-    public void addToCompare() throws InterruptedException {
+    public void addToCompare() {
        String model1 = "Samsung";
        String model2 = "Xiaomi";
 
