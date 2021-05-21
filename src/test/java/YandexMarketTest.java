@@ -17,25 +17,26 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class YandexMarketTest {
 
     protected static WebDriver driver;
     private Logger logger = LogManager.getLogger(YandexMarketTest.class);
-    private ServerConfig conf = ConfigFactory.create(ServerConfig.class);  //создание переменной, которую можно использовать для получения параметров из конфиг.пропертис
+    private ServerConfig conf = ConfigFactory.create(ServerConfig.class);                       //создание переменной, которую можно использовать для получения параметров из конфиг.пропертис
 
     By electronicLocator = By.cssSelector("[href*='/catalog--elektronika/'] > span");
     By mobileLocator = By.cssSelector("[href*='/catalog--smartfony/']");
     By modelNameLocator = By.cssSelector("[data-zone-name='title'] a");
     By compareWidgetLocator = By.cssSelector("[data-apiary-widget-id='/content/popupInformer'] > div");
     By unitNameInWidgetLocator = By.cssSelector("div > div:nth-child(2) > div:first-child");
-    By resultListLocator = By.cssSelector("[data-zone-name='snippetList'] > article");
+    By resultListLocator = By.cssSelector("div[data-zone-name='snippetList'] > article[data-autotest-id='product-snippet']");
     By ascOrderFilterLocator = By.cssSelector("button[data-autotest-id='dprice']");
     By makerLocator = By.cssSelector("fieldset[data-autotest-id='7893318']");
     By compareUnitListLocator = By.cssSelector("div[data-apiary-widget-id='/content/compareContent'] img");
     By overlaySearchResultLocator = By.cssSelector("div[data-tid='67d9be0a']");
     By buttonCompareInWidget = By.linkText("Сравнить");
+    By buttonCloseWidget = By.cssSelector("button[data-tid='dfde436b']");
+    By currentCompareLocator = By.cssSelector("div[aria-label*='сравнению'");                   //получение локатора для конкретного товара в списке
 
     String compareTitle = "Сравнение товаров — Яндекс.Маркет";
 
@@ -50,7 +51,6 @@ public class YandexMarketTest {
         //2. Перейти Элекроника - Смартфоны
         goToElectronicPage();
         goToSmartphonesPage();
-        logger.info("Перешли в раздел Смартфоны");
 
         //3. Отсортировать список товаров Samsung и Xiaomi
         filterByMaker(model1);
@@ -65,17 +65,18 @@ public class YandexMarketTest {
         logger.debug("Получен список результатов. Размер массива = {}", resultsList.size());
 
         String modelName1 = addFirstToCompare(resultsList, model1);
-        String phoneNameInPopup1 = getTextPhoneNameInCompareWidget();  //получить полное название модели из виджета сравнения
+        String phoneNameInPopup1 = getTextPhoneNameInCompareWidget();                                   //получить полное название модели из виджета сравнения
         logger.info("Текст в плашке сравнения: {}", phoneNameInPopup1);
         //Проверить, что отобразилась плашка "Товар {имя товара} добавлен к сравнению"
-        assertTrue(phoneNameInPopup1.equals("Товар " + modelName1 + " добавлен к сравнению"));
+        assertEquals("Товар " + modelName1 + " добавлен к сравнению", phoneNameInPopup1);
+        closeWidget();
 
         //6. Добавить первый в списке Xiaomi
-        String modelName2 = addFirstToCompare(resultsList, model2);
-        String phoneNameInPopup2 = getTextPhoneNameInCompareWidget();  //получить полное название модели из виджета сравнения
+        String modelName2 = addFirstToCompare(getAllResults(), model2);
+        String phoneNameInPopup2 = getTextPhoneNameInCompareWidget();                                   //получить полное название модели из виджета сравнения
         logger.info("Текст в плашке сравнения: {}", phoneNameInPopup2);
         //Проверить, что отобразилась плашка "Товар {имя товара} добавлен к сравнению"
-        assertTrue(phoneNameInPopup2.equals("Товар " + modelName2 + " добавлен к сравнению"));
+        assertEquals("Товар " + modelName2 + " добавлен к сравнению", phoneNameInPopup2);
 
         //7. перейти к сравнению
         goToComparePage();
@@ -86,15 +87,17 @@ public class YandexMarketTest {
 
     private String addFirstToCompare(List<WebElement> resultsList, String model) {
         for (int i = 0; i < resultsList.size(); i++) {
-            By currentCompareLocator = By.cssSelector("div[data-zone-name='snippetList'] article:nth-child(" + (i + 1) + ") div[aria-label*='сравнению']"); //получение локатора для конкретного товара в списке
+            By currentCompareLocator = By.cssSelector("div[aria-label*='сравнению'");                   //получение локатора для конкретного товара в списке
+
             WebElement phoneItem = resultsList.get(i);
             String modelName = phoneItem.findElement(modelNameLocator).getAttribute("title");      //получение имени модели в списке
             logger.debug("{} Получено имя модели в списке: {}", i, modelName);
             if (modelName.contains(model)) {
                 Actions action2 = new Actions(driver);
                 action2.moveToElement(phoneItem).build().perform();                                     //наведение мышки на элемент списка с найденным телефоном, чтобы появилась кнопка "Добавить к сравнению"
+
                 WebElement currentCompareButton = phoneItem.findElement(currentCompareLocator);         // получение элемента "Добавить к сравнению" у нужной модели
-                waitElementToBeClickable(currentCompareButton, 10).click();                    //ожидание и клик по кнопке "Добавить к сравнению"
+                action2.moveToElement(currentCompareButton).click().build().perform();                  // наведение мышки и клик по локатору сравнения
                 return modelName;
             }
         }
@@ -140,6 +143,12 @@ public class YandexMarketTest {
     public String getTextPhoneNameInCompareWidget() {
         WebElement compareWidget =  waitVisibilityElement(compareWidgetLocator, 10);            //ожидание появление виджета
         return compareWidget.findElement(unitNameInWidgetLocator).getAttribute("innerText");
+    }
+
+    //закрытие виджета сравнения
+    public void closeWidget() {
+        WebElement compareWidget =  waitVisibilityElement(compareWidgetLocator, 10);            //ожидание появление виджета
+        compareWidget.findElement(buttonCloseWidget).click();
     }
 
     public WebElement waitVisibilityElement(By locator, int timeInSec) {
