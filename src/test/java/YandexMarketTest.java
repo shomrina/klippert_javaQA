@@ -87,8 +87,6 @@ public class YandexMarketTest {
 
     private String addFirstToCompare(List<WebElement> resultsList, String model) {
         for (int i = 0; i < resultsList.size(); i++) {
-            By currentCompareLocator = By.cssSelector("div[aria-label*='сравнению'");                   //получение локатора для конкретного товара в списке
-
             WebElement phoneItem = resultsList.get(i);
             String modelName = phoneItem.findElement(modelNameLocator).getAttribute("title");      //получение имени модели в списке
             logger.debug("{} Получено имя модели в списке: {}", i, modelName);
