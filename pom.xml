@@ -11,6 +11,14 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <browser>chrome</browser>
+        <options>start-maximized</options>
+        <login>milagrous@gmail.com</login>
+        <password>fJ!ntyy2wRg9Fdh</password>
+        <!--<login>vanog59788@frnla.com</login>
+        <password>P@55w0rD1</password>-->
     </properties>
 
     <dependencies>
@@ -49,6 +57,23 @@
             <version>1.0.10</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <browser>${browser}</browser>
+                        <options>${options}</options>
+                        <login>${login}</login>
+                        <password>${password}</password>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 
 </project>
