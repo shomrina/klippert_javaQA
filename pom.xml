@@ -15,6 +15,10 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <browser>chrome</browser>
         <options>start-maximized</options>
+        <login>milagrous@gmail.com</login>
+        <password>_evD@DicbSkua5g</password>
+        <!--<login>vanog59788@frnla.com</login>
+        <password>P@55w0rD1</password>-->
     </properties>
 
     <dependencies>
