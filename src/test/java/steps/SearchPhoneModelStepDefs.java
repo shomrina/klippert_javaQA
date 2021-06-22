@@ -16,6 +16,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import pages.ElectronicPage;
 import pages.MainPage;
 import pages.SmartphonesPage;
+import utils.WebDriverFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,9 +80,7 @@ public class SearchPhoneModelStepDefs {
     //Hooks cucumber
     @Before
     public void setUp() {
-        WebDriverManager.chromedriver().setup();
-        driver = new ChromeDriver();
-        driver.manage().window().maximize();
+        driver = WebDriverFactory.create(System.getProperty("browser"), System.getProperty("options"));
         logger.info("Драйвер поднят");
     }
 
