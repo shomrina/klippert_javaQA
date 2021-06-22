@@ -2,7 +2,7 @@ Feature: search mobile
 
   Background:
     Given Open yandex.market page
-    And Go to eleсtronics page
+    And Go to electronics page
     And Go to smartphones page
 
   Scenario Outline: Sort mobile by maker "<maker>"
