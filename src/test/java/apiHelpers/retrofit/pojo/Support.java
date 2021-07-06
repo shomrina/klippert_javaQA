@@ -1,0 +1,21 @@
+
+package apiHelpers.retrofit.pojo;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+
+@lombok.Data
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class Support {
+
+    @JsonProperty("text")
+    private String text;
+    @JsonProperty("url")
+    private String url;
+
+
+}
