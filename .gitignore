@@ -172,3 +172,4 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,intellij,maven,java
 # Generate gitignore file: https://gitignore.io/
+/javaQA.homeworks.iml
