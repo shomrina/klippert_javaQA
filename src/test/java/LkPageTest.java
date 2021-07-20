@@ -1,3 +1,7 @@
+import io.qameta.allure.Description;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
@@ -10,6 +14,10 @@ public class LkPageTest extends BaseTest {
     private Logger logger = LogManager.getLogger(LkPageTest.class);
 
     @Test
+    @Epic(value = "Otus")
+    @Feature(value = "Личный кабинет")
+    @Story(value = "Проверка заполнения данных о себе")
+    @Description(value = "Тест проверяет заполнение первой страницы анкеты, блок 'О себе'")
     public void fillAboutMyself() throws InterruptedException {
         //TEST DATA
         String firstName = "Марина";
@@ -19,10 +27,6 @@ public class LkPageTest extends BaseTest {
         String dateOfBirthday = "06.06.1987";
         String country = "Россия";
         String city = "Санкт-Петербург";
-        String contactType1 = "WhatsApp";
-        String contactValue1 = "89117750600";
-        String contactType2 = "Skype";
-        String contactValue2 = "filled_by_autotest";
         String englishLevel = "Средний (Intermediate)";
         String login = System.getProperty("login");
         String password = System.getProperty("password");
@@ -41,13 +45,6 @@ public class LkPageTest extends BaseTest {
         lKpersonalDataPage.selectCountry(country);                            //Страна
         lKpersonalDataPage.selectCity(city);                                  //Город
         lKpersonalDataPage.selectEngLevel(englishLevel);                      //уровень англ.
-        //контактная информация. добавление контактов
-        lKpersonalDataPage.deleteAllContacts();                               //удаление всех контактов (чтобы не делать проверку на их существование)
-        lKpersonalDataPage.clickButtonAdd();
-        lKpersonalDataPage.addContact(contactType1, contactValue1);
-        //добавление второго контакта
-        lKpersonalDataPage.clickButtonAdd();
-        lKpersonalDataPage.addContact(contactType2, contactValue2);
         //5. Нажать сохранить
         lKpersonalDataPage.saveAndContinue();
 

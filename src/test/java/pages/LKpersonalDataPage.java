@@ -1,5 +1,6 @@
 package pages;
 
+import io.qameta.allure.Step;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
@@ -59,6 +60,7 @@ public class LKpersonalDataPage extends AbstractPage{
     private WebElement saveAndContinueButton;
 
 
+    @Step("Заполнение персональных данных")
     public void fillPersonalData(String firstName, String firstNameLatin, String lastName, String lastNameLatin, String dateOfBirthday) {
         clearAndSendKeys(fname, firstName);
         clearAndSendKeys(fnameLatin, firstNameLatin);
@@ -67,7 +69,7 @@ public class LKpersonalDataPage extends AbstractPage{
         clearAndSendKeys(birthday, dateOfBirthday);
     }
 
-
+    @Step("Выбор Страны")
     public void selectCountry(String selectedCountry) {
         if(!country.getText().contains(selectedCountry))
         {
@@ -76,6 +78,7 @@ public class LKpersonalDataPage extends AbstractPage{
         }
     }
 
+    @Step("Выбор Города")
     public void selectCity(String selectedCity) {
         if(!city.getText().contains(selectedCity))
         {
@@ -84,6 +87,7 @@ public class LKpersonalDataPage extends AbstractPage{
         }
     }
 
+    @Step("Выбор уровня знания языка")
     public void selectEngLevel(String engLvl) {
         if(!englishLevel.getText().contains(engLvl))
         {
@@ -94,15 +98,17 @@ public class LKpersonalDataPage extends AbstractPage{
 
     public void deleteAllContacts() {
         for(WebElement deletes : deleteButton) {                                                                           //нажать "Удалить" для всех контактов
-            deletes.click();
+          //  deletes.click();
         }
     }
 
+    @Step("Нажать кнопку добавить")
     public void clickButtonAdd() {
         buttonAdd.click();
         logger.info("Нажали 'Добавить'");
     }
 
+    @Step("Добавить контакт {contactType}")
     public void addContact(String contactType, String contactValue) throws InterruptedException {
         WebElement contactButton = contactsBlock.findElement(contactTypeButtonLocator);                                     //кнопка для выбора типа связи
         Thread.sleep(10000);
@@ -122,6 +128,7 @@ public class LKpersonalDataPage extends AbstractPage{
         logger.info("Введено значение для типа связи: {}",  contactValue);
     }
 
+    @Step("Нажать кнопку 'Сохранить и продолжить'")
     public LKskillsPage saveAndContinue() {
         saveAndContinueButton.click();
         logger.info("Введенные данные сохранены");

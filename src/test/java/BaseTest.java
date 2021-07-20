@@ -11,9 +11,7 @@ public class BaseTest {
 
     @Before
     public void setUp() {
-        //ввод опций через пробел внутри кавычек(если опций несколько), например: mvn clean test -Dbrowser="chrome" -Doptions="window-size=1920,1080 incognito" (для линукса кавычки одинарные)
-        //или пример mvn clean test -Dbrowser="chrome" -Doptions="start-maximized" -Dlogin="log" -Dpassword="pass"
-        //mvn clean test -Dbrowser="chrome" -Doptions="start-maximized" -Dlogin="milagrous@gmail.com" -Dpassword="fJ!ntyy2wRg9Fdh"
+        //mvn clean test -Dbrowser="chrome" -Doptions="start-maximized headless" -Dlogin="milagrous@gmail.com" -Dpassword="_evD@DicbSkua5g"
         driver = WebDriverFactory.create(System.getProperty("browser"), System.getProperty("options"));
         logger.info("Драйвер поднят");
     }

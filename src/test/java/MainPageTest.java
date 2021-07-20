@@ -1,5 +1,9 @@
 import config.ServerConfig;
 import io.github.bonigarcia.wdm.WebDriverManager;
+import io.qameta.allure.Description;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,10 +25,15 @@ public class MainPageTest extends BaseTest {
 
     private Logger logger = LogManager.getLogger(MainPageTest.class);
 
-    @Ignore
+
     @Test
+    @Epic(value = "Otus")
+    @Feature(value = "Главная страница")
+    @Story(value = "Проверка тайтла главной страницы")
+    @Description(value = "Тест проверяет текст в атрибуте Title для главной страницы")
     public void verifyTitleMainPage() {
         MainPage mainPage = new MainPage(driver);
+        mainPage.open();
         assertEquals(mainPage.getTitleMainPage(), mainPage.getTitleThisPage());
         logger.info("Проверка Title страницы завершена с успешным результатом");
     }
