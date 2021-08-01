@@ -11,10 +11,10 @@ pipeline {
     parameters {
         string(name: 'GIT_URL', defaultValue: 'https://github.com/shomrina/klippert_javaQA.git', description: 'The target git url')
         string(name: 'GIT_BRANCH', defaultValue: 'seleniumAllureJenkins', description: 'The target git branch')
-        choice(name: 'BROWSER', choices: ['chrome', 'firefox'], description: 'Pick the target browser in Selenoid')
+        choice(name: 'BROWSER', choices: ['chrome', 'firefox'], description: 'Pick the target browser in Selenium')
         choice(name: 'OPTIONS', choices:['start-maximized', 'headless'], description: 'The browser options')
-        string(name: 'LOGIN', defaultValue: 'milagrous@gmail.com', description: 'Login')
-        string(name: 'PASSWORD', defaultValue: '_evD@DicbSkua5g', description: 'Password')
+        string(name: 'LOGIN', description: 'Personal Login in LK Otus')
+        string(name: 'PASSWORD', description: 'Personal Password in LK Otus')
     }
 
     stages {
