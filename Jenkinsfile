@@ -36,10 +36,6 @@ pipeline {
                 always {
                     archiveArtifacts artifacts: '**/target/', fingerprint: true
 
-                    sh """
-                    ls -a ${WORKSPACE}
-                    """
-
                   script {
                     if (currentBuild.currentResult == 'SUCCESS') {
                     step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: "test.marina.qa.otus@gmail.com", sendToIndividuals: true])
@@ -58,7 +54,7 @@ pipeline {
                       results: [[path: 'target/allure-results']]
                     ])
                     }
-                    
+
                     println('allure report created')
 
                     // Узнаем ветку репозитория
