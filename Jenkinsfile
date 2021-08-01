@@ -43,8 +43,6 @@ pipeline {
                     step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: "test.marina.qa.otus@gmail.com", sendToIndividuals: true])
                     }
 
-                    ws("$workspace/"){
-
                     // Формирование отчета
                     allure([
                       includeProperties: false,
@@ -53,7 +51,6 @@ pipeline {
                       reportBuildPolicy: 'ALWAYS',
                       results: [[path: 'target/allure-results']]
                     ])
-                    }
 
                     println('allure report created')
 
