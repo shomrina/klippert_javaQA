@@ -13,8 +13,7 @@ import pages.MainPage;
 
 public class LkPageTest extends BaseTest {
     private Logger logger = LogManager.getLogger(LkPageTest.class);
-
-    @Ignore
+    
     @Test
     @Epic(value = "Otus")
     @Feature(value = "Личный кабинет")
