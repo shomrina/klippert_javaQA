@@ -30,10 +30,7 @@ pipeline {
         stage('Run maven clean test') {
             steps {
                 sh 'mvn clean test -Dbrowser=$BROWSER_NAME -Doptions=$OPTIONS -Dlogin=$LOGIN -Dpassword=$PASSWORD'
-            }
-        }
-        stage('Backup and Reports') {
-            steps {
+
                 archiveArtifacts artifacts: '**/target/', fingerprint: true
             }
             post {
