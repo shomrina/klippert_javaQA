@@ -30,11 +30,13 @@ pipeline {
         stage('Run maven clean test') {
             steps {
                 sh 'mvn clean test -Dbrowser=$BROWSER_NAME -Doptions=$OPTIONS -Dlogin=$LOGIN -Dpassword=$PASSWORD'
-
-                archiveArtifacts artifacts: '**/target/', fingerprint: true
             }
             post {
+
                 always {
+                    archiveArtifacts artifacts: '**/target/', fingerprint: true
+
+
                   script {
                     if (currentBuild.currentResult == 'SUCCESS') {
                     step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: "test.marina.qa.otus@gmail.com", sendToIndividuals: true])
