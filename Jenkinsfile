@@ -36,6 +36,9 @@ pipeline {
                 always {
                     archiveArtifacts artifacts: '**/target/', fingerprint: true
 
+                    sh """
+                    ls -a ${WORKSPACE}
+                    """
 
                   script {
                     if (currentBuild.currentResult == 'SUCCESS') {
@@ -44,6 +47,7 @@ pipeline {
                     step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: "test.marina.qa.otus@gmail.com", sendToIndividuals: true])
                     }
 
+                    ws("$workspace/"){
 
                     // Формирование отчета
                     allure([
@@ -53,6 +57,8 @@ pipeline {
                       reportBuildPolicy: 'ALWAYS',
                       results: [[path: 'target/allure-results']]
                     ])
+                    }
+                    
                     println('allure report created')
 
                     // Узнаем ветку репозитория
